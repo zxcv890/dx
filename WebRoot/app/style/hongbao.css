@@ -1,0 +1,67 @@
+body, p, ul, li, h1, h2, h3, form, dl, div {
+	margin: 0;
+	padding: 0;
+}
+
+  @media screen and (max-width:320px) {
+  .mate>div{ height: 40px; }
+  
+}
+@media screen and (min-width: 375px) {
+    .mate>div{ height: 48px; }
+}
+
+body {
+	font: 12px/1.231 "Microsoft Yahei", "Hiragino Sans GB", Tahoma, HELVETICA, Arial, sans-serif;
+	color: #4c4c4c;
+	-webkit-font-smoothing: antialiased;
+	height: 100%;
+}
+li{list-style: none;}
+a {
+	color: #666;
+	text-decoration: none;
+	cursor: pointer;
+	outline: none;
+}
+.row{padding: 0 !important; margin:0 !important;}
+
+img {
+	vertical-align: middle
+}
+/* css重置 */
+.float-left{ float: left; }
+.float-right{ float: right; }
+.red{ color: #C9140C; }
+.red-bg{ background-color:#E70012; color: #fff !important;}
+
+.top-bg{ text-align: center; }
+.top-color{ background-color: #E05349; height: 50px; width: 100%;}
+.info-top{ border-radius: 50%; width: 60px; height: 60px; margin-top: 5px;}
+.name{ margin-top: 40px;  text-align: center; line-height: 20px;}
+.name .one{ font-size: 14px; }
+.name span{ color:#019FEE;  }
+.content-img{ padding: 0 100px; margin-top: 20px; margin-bottom: 20px;}
+.mq{ font-size: 16px; text-align: center !important;  width: 100%;}
+.btn-box{padding: 0 50px; margin-top: 40px;}
+.btn-box a{ display: block;background:-webkit-linear-gradient(top,#17D020,#0FCC1A,#05B411); line-height: 30px; font-size: 16px; color: #fff;}
+
+.chaihongbao{ text-align: center; background-color: #E05349; height: 250px;}
+.chaihongbao img{ margin-bottom: 40px; margin-top: 40px; }
+.chaihongbao .one{ color: #FBE2A4; margin-bottom: 10px;}
+.chaihongbao .two{ color: #FBE2A4; font-size: 18px; }
+.kai-box{ text-align: center; }
+.kai-box img{ width: 100px; height: 100px; margin-top: -50px;}
+.kai-box p{ position: absolute; bottom:40px; text-align: center; width: 100%;}
+.kai-box p a{ color:#FBE2A4; font-size: 14px; }
+.linqian{ text-align: center;  margin-top: 10px; color: #636363;}
+.linqian .one{ font-size: 34px; font-weight: 500; }
+.cklq-box{ text-align: center; margin-top: 10px;}
+.cklq-box a{ color: #01A1ED; }
+.titles{ height: 30px; line-height: 30px; background-color: #F5F5F5; padding: 0 15px; margin-top: 20px;}
+.momo-box img{ width: 60px; height: 60px; float: left; margin-right: 10px; }
+.momo-box>div{ padding: 5px 0;  border-bottom: #DDDDDD solid 1px; overflow: hidden;zoom:1; position: relative;}
+.momo-box{padding: 0px 15px;}
+.momo-box .momo{ float: left; padding-top: 10px;}
+.momo-box .momo p{ line-height: 20px; }
+.money{ position: absolute; top: 25px; right: 0px; font-size: 18px; font-weight: 500;}

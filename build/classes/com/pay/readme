@@ -1,0 +1,11 @@
+源自mt项目的微信支付源码
+
+
+String url = WxConfiger.ServerUrl + "wxlogin/returncode";
+		try {
+			url = URLEncoder.encode(url, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+String wx = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" +
+			WxConfiger.CorpID + "&redirect_uri=" + url + "&response_type=code&scope=snsapi_base&state=1#wechat_redirect";

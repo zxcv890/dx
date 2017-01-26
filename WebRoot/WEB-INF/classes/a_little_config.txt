@@ -1,0 +1,4 @@
+jdbcUrl=jdbc:mysql://jmwywjmwyw.mysql.rds.aliyuncs.com/qmq?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+user=qmq
+password=qmqqmq
+devMode=false
