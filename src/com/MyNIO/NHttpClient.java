@@ -1,39 +1,41 @@
 package com.MyNIO;
 
- import org.apache.http.*;
- import org.apache.http.impl.DefaultConnectionReuseStrategy;
- import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
- import org.apache.http.impl.nio.reactor.DefaultConnectingIOReactor;
- import org.apache.http.message.BasicHttpRequest;
- import org.apache.http.nio.NHttpConnection;
- import org.apache.http.nio.protocol.BufferingHttpClientHandler;
- import org.apache.http.nio.protocol.HttpRequestExecutionHandler;
- import org.apache.http.nio.reactor.IOEventDispatch;
- import org.apache.http.nio.reactor.IOReactorExceptionHandler;
- import org.apache.http.nio.reactor.SessionRequest;
- import org.apache.http.nio.reactor.SessionRequestCallback;
- import org.apache.http.params.BasicHttpParams;
- import org.apache.http.params.CoreConnectionPNames;
- import org.apache.http.params.HttpParams;
- import org.apache.http.protocol.*;
+import java.io.*;
+import java.net.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.zip.GZIPInputStream;
 
- import java.io.IOException;
- import java.io.InterruptedIOException;
- import java.net.InetAddress;
- import java.net.InetSocketAddress;
- import java.net.SocketAddress;
- import java.net.URL;
- import java.util.EventListener;
- import java.util.HashMap;
- import java.util.Iterator;
- import java.util.Map;
- import java.util.concurrent.locks.Condition;
- import java.util.concurrent.locks.Lock;
- import java.util.concurrent.locks.ReentrantLock;
- import java.util.logging.Logger;
- import java.util.zip.GZIPInputStream;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.*;
+import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
+import org.apache.http.impl.nio.reactor.DefaultConnectingIOReactor;
+import org.apache.http.message.BasicHttpRequest;
+import org.apache.http.nio.NHttpConnection;
+import org.apache.http.nio.protocol.BufferingHttpClientHandler;
+import org.apache.http.nio.protocol.EventListener;
+import org.apache.http.nio.protocol.HttpRequestExecutionHandler;
+import org.apache.http.nio.reactor.IOEventDispatch;
+import org.apache.http.nio.reactor.IOReactorExceptionHandler;
+import org.apache.http.nio.reactor.SessionRequest;
+import org.apache.http.nio.reactor.SessionRequestCallback;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.BasicHttpProcessor;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.RequestConnControl;
+import org.apache.http.protocol.RequestContent;
+import org.apache.http.protocol.RequestExpectContinue;
+import org.apache.http.protocol.RequestTargetHost;
+import org.apache.http.protocol.RequestUserAgent;
+
 /**
- *
  * 作用: 支持异步读取的httpClient
  * 暂时不支持socks代理
  */
@@ -55,7 +57,6 @@ public class NHttpClient {
     private int connections = 0;
     private Lock lock = new ReentrantLock();
     private final Condition full = lock.newCondition();
-
     public void addConnection() throws Exception {
         lock.lock();
         try {
@@ -168,21 +169,17 @@ public class NHttpClient {
                 setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeOut).
                 setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 512 * 1024).
                 setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, true);
-        // setBooleanParameter(CoreConnectionPNames., true);
-        if ( localAddress == null || localAddress.equals("") ) {
+        // 原本有的，出错给注掉了
+        if ( localAddress != null && localAddress.equals("") ) {
             localSocketAddress = InetSocketAddress.createUnresolved(localAddress, 0);
         }
+        /**
+         * 设置几个固定的http 头
+         */
         defaultHeaders.put("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.1) Gecko/20090624 Firefox/3.5 GTB5");
         defaultHeaders.put("Accept-Language", "zh-cn,zh;q=0.5");
         defaultHeaders.put("Accept-Charset", "GB2312,utf-8;q=0.7,*;q=0.7");
         defaultHeaders.put("Accept", "*/*");
-        /**
-         * 设置几个固定的http 头
-         */
-        // defaultHeaders.put("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.1) Gecko/20090624 Firefox/3.5 GTB5");
-        // defaultHeaders.put("Accept-Language", "zh-cn,zh;q=0.5");
-        // defaultHeaders.put("Accept-Charset", "GB2312,utf-8;q=0.7,*;q=0.7");
-        // defaultHeaders.put("Accept", "*/*");
         ioReactor = new DefaultConnectingIOReactor(2, params);
         BasicHttpProcessor httpproc = new BasicHttpProcessor();
         httpproc.addInterceptor(new RequestContent());
@@ -231,6 +228,7 @@ public class NHttpClient {
             url += "http://" + host;
         }
         URL u = new URL(url);
+        URLConnection conn = u.openConnection();
         int port = u.getPort() < 0 ? u.getDefaultPort() : u.getPort();
         String path = u.getPath();
         if (path == null || path.equals("")) {
@@ -370,22 +368,28 @@ public class NHttpClient {
                 if (response.getStatusLine().getStatusCode() != 200) {
                     throw new IOException("invalid response code=" + response.getStatusLine().getStatusCode() + ",url=" + internalObject.getUrl());
                 }
+                String encoding = "";
+                if ( internalObject.getUrl().contains(".cn/") ){
+                    encoding = "utf-8";
+                }else{
+                    encoding = "GBK";
+                }
                 Header[] headers = response.getAllHeaders();
                 for (Header header : headers) {
                 }
                 if (entity.getContentEncoding() != null && "gzip".equals(entity.getContentEncoding().getValue())) {
                     //是压缩的流
                     GZIPInputStream inStream = new GZIPInputStream(entity.getContent());
-                    content = IOUtils.toString(inStream);
+                    content =  IOUtils.toString(inStream ,encoding);
                 } else {
-                    content = IOUtils.toString(entity.getContent(), "GBK");
+                    content = IOUtils.toString(entity.getContent(),encoding);
                     // content = EntityUtils.toString(entity, "GBK");
                 }
                 System.out.println("-----------------------");
                 System.out.println("response " + response.getStatusLine() + " of url=" + internalObject.getUrl() + ",content=" + content.length());
                 System.out.println("content=" + content.indexOf("page-info"));
                 System.out.println("-----------------------");
-                //System.out.println("content="+content);
+                System.out.println("content="+content);
                 internalObject.getCallback().finished(content);
             } catch (Exception e) {
                 e.printStackTrace();

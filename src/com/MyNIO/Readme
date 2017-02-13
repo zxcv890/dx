@@ -1,0 +1,5 @@
+该包下只保存与NIO相关的java文件，如另需其它文件支持，下面将做出说明
+    目前的问题
+        1.总体的功能实现没有问题，可以传输，目前有个问题就是读取网页时会有不同的字符集问题，目前没办法解决
+jar包： commons-io-2.5.jar   commons-logging-1.2.jar
+        httpclient-4.5.2.jar  httpclient-cache-4.5.2.jar  httpcore-4.4.4.jar  httpcore-nio-4.0-beta1.jar
